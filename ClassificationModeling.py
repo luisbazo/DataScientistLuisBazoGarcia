@@ -25,8 +25,6 @@ from sklearn.metrics import roc_auc_score as AUC
 
 # In[23]:
 
-print (pd.show_versions())
-
 #loading csv file into python
 dataset = pd.read_csv('./device_failure.csv',encoding='unicode_escape')
 
@@ -40,7 +38,7 @@ dataset.head(10)
 # In[4]:
 
 
-dataset.isnull().sum()
+#dataset.isnull().sum()
 data = dataset.dropna(axis=0)
 
 
@@ -81,6 +79,7 @@ data.sort_values(['device','date'],inplace=True)
 data['date'] = pd.to_datetime(data['date'])
 data['Days'] = data.groupby('device')['date'].rank(method='dense')
 
+print (data.head(10))
 
 # In[43]:
 
@@ -88,7 +87,7 @@ data['Days'] = data.groupby('device')['date'].rank(method='dense')
 #initial data analysis
 data.columns.shape
 data['failure'].value_counts()
-data.groupby(['attribute7','attribute8'])['attribute7'].count()
+#data.groupby(['attribute7','attribute8'])['attribute7'].count()
 #attributes 7 and 8 have same values so one of them can be discarded
 
 
@@ -118,47 +117,47 @@ sns.heatmap(Corr,annot=True)
 # In[12]:
 
 
-fig = plt.figure(figsize = (14,5))
-plt.plot(data.attribute9,data.attribute3,'o')
-plt.title("Relationship between attributes")
-plt.xlabel('X (Attribute9)')
-plt.ylabel('Y (Attribute3)')
-plt.show()
+#fig = plt.figure(figsize = (14,5))
+#plt.plot(data.attribute9,data.attribute3,'o')
+#plt.title("Relationship between attributes")
+#plt.xlabel('X (Attribute9)')
+#plt.ylabel('Y (Attribute3)')
+#plt.show()
 
 
 # In[13]:
 
 
-fig = plt.figure(figsize = (15,5))
-plt.subplot2grid((1,2),(0,0))
+#fig = plt.figure(figsize = (15,5))
+#plt.subplot2grid((1,2),(0,0))
 #Failure vs Attribute1
-Failure.attribute3.value_counts().plot(kind='barh')
-plt.title("Distribution of Failure according to attribute1")
-plt.xlabel("Failures")
-plt.ylabel("Attribute3")
+#Failure.attribute3.value_counts().plot(kind='barh')
+#plt.title("Distribution of Failure according to attribute1")
+#plt.xlabel("Failures")
+#plt.ylabel("Attribute3")
 
-plt.subplot2grid((1,2),(0,1))
-Failure.attribute7.value_counts().plot(kind='barh')
-plt.title("Distribution of Failure according to attribute2")
-plt.xlabel("Failure")
-plt.ylabel("Attribute9")
+#plt.subplot2grid((1,2),(0,1))
+#Failure.attribute7.value_counts().plot(kind='barh')
+#plt.title("Distribution of Failure according to attribute2")
+#plt.xlabel("Failure")
+#plt.ylabel("Attribute9")
 
 
 # In[14]:
 
 
-fig = plt.figure(figsize = (15,5))
-plt.subplot2grid((2,2),(0,0))
-Failure.attribute4.value_counts().plot(kind='barh')
-plt.title("Distribution of Failure according to attribute4")
-plt.xlabel("Failure")
-plt.ylabel("Attribute3")
+#fig = plt.figure(figsize = (15,5))
+#plt.subplot2grid((2,2),(0,0))
+#Failure.attribute4.value_counts().plot(kind='barh')
+#plt.title("Distribution of Failure according to attribute4")
+#plt.xlabel("Failure")
+#plt.ylabel("Attribute3")
 
-plt.subplot2grid((2,2),(0,1))
-Failure.attribute9.value_counts().plot(kind='barh')
-plt.title("Distribution of Failure according to attribute9")
-plt.xlabel("Failure")
-plt.ylabel("Attribute3")
+#plt.subplot2grid((2,2),(0,1))
+#Failure.attribute9.value_counts().plot(kind='barh')
+#plt.title("Distribution of Failure according to attribute9")
+#plt.xlabel("Failure")
+#plt.ylabel("Attribute3")
 
 
 # In[15]:
@@ -175,7 +174,7 @@ data.describe()
 
 df_nonfailure = data[data['failure'] == 0]
 df_failure = data[data['failure']==1]
-df_nonfailure_downsample = resample(df_nonfailure,replace=False,n_samples = 106,                                    random_state=23)
+df_nonfailure_downsample = resample(df_nonfailure,replace=False,n_samples = 106,random_state=23)
 df_resampled = pd.concat([df_nonfailure_downsample,df_failure])
 
 data_Outcome = df_resampled['failure']
@@ -198,7 +197,7 @@ data_scaled.head()
 
 
 #split data into test and train
-xtrain,xtest,ytrain,ytest = train_test_split(data_scaled,data_Outcome,                                              test_size=0.25,random_state =19)
+xtrain,xtest,ytrain,ytest = train_test_split(data_scaled,data_Outcome,test_size=0.25,random_state =19)
 
 
 # In[30]:
@@ -326,9 +325,45 @@ def model_comparison(X_train,X_test, y_train,y_test):
 
 model_comparison(xtrain,xtest,ytrain,ytest)
 
-
 # In[ ]:
 
 
 #Decision tree and random forest are perhabs giving the best results among all.
 #Although I think models can be improved if provided with more failure data
+
+
+def corr_df(x, corr_val):
+    '''
+    Obj: Drops features that are strongly correlated to other features.
+          This lowers model complexity, and aids in generalizing the model.
+    Inputs:
+          df: features df (x)
+          corr_val: Columns are dropped relative to the corr_val input (e.g. 0.8)
+    Output: df that only includes uncorrelated features
+    '''
+
+    # Creates Correlation Matrix and Instantiates
+    corr_matrix = x.corr()
+    iters = range(len(corr_matrix.columns) - 1)
+    drop_cols = []
+
+    # Iterates through Correlation Matrix Table to find correlated columns
+    for i in iters:
+        for j in range(i):
+            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+            col = item.columns
+            row = item.index
+            val = item.values
+            if val >= corr_val:
+                # Prints the correlated feature set and the corr val
+                print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+                drop_cols.append(i)
+
+    drops = sorted(set(drop_cols))[::-1]
+
+    # Drops the correlated columns
+    for i in drops:
+        col = x.iloc[:, (i+1):(i+2)].columns.values
+        df = x.drop(col, axis=1)
+
+    return df
