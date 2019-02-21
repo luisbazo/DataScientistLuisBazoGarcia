@@ -3,22 +3,22 @@
 
 # Introduction
 
-This script reads a csv file with telemetry values from vehicules and performs different Machine Learning models to predict vehicule failures. Several models are assessed to 
+This script reads a csv file with telemetry values from devices and trains different Machine Learning models to predict device failures. 
 
 ## Main steps performed during the script
 
  1. Read the data from csv and initiate panda dataframe with the information
  2. Transform data columns types into readable values by ML models (strings are mapped as objects and they can't be read by models)
- 3. Remove highly correlated columns. They don't provide any value to the model and reduce the efficiency and increase processing time
+ 3. Remove highly correlated columns. They don't provide any value to the model, reduce the efficiency and increase processing time
  4. Assess majority class balance
  
-      a. Given that false failures are highly predominant, downsample majority class to balance possitive and negative
+      a. Given that false failures are highly predominant, downsample majority class to balance positives and negatives
       
-      b. Scale data to standarize features magnitudes. That improves ML model training.
+      b. Scale data to standardize feature magnitudes improving ML model training.
  
  
- 5. Split train dataset in train and test datasets respectivelly. Test dataset represents the 25% of the train dataset. 
- 6. Train/Fit models and get predicted values for the test dataset. A separate thread is created for every single model trainin run.
+ 5. Split initial dataset in train and test datasets respectively. Test dataset represents the 25% of the initial dataset. 
+ 6. Train/Fit models and get predicted values for the test dataset. A separate thread is created for every single model-training run.
  7. Plot different metrics with models performance and compare model calibration
  
  Please note: The Machine Learning models used for this exercise are the ones provided by the sklearn library of Python.
@@ -62,7 +62,7 @@ There is also the list of binary classification models to be used for training. 
 
 
 ```python
-#Disable warnings. That lines should be commmented if we want warnings to be displayed
+#Disable warnings. That lines should be commented if we want warnings to be displayed
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
     
@@ -1098,7 +1098,7 @@ dataset.dtypes
 
 
 
-Transform objects into readable types by Machine Learning sklearn models
+Transform objects into readable types (int, float) by Machine Learning sklearn models
 
 
 ```python
@@ -1289,7 +1289,7 @@ dataset.describe()
 
 
 
-Run correlation method that removes higly related columns (over 80%). 
+Run correlation method that removes highly related columns (over 80%). 
 Similar features do not contribute to model performance and it makes it slower to train.
 
 
@@ -1486,7 +1486,7 @@ data.describe()
 Perform initial analysis on column date which was initially an object. 
 According to the graph below, there seems there is not any relation between the date and the failure. 
 
-Note: The feature is removed from the model training but it might be worth to have a conversation with the customer to figure out the real meaning of this feature.
+Note: The feature "date" is removed from the model training but it might be worth to have a conversation with the customer to figure out the real meaning of this feature.
 
 
 ```python
@@ -1509,15 +1509,15 @@ notRelevantColumns.extend(['date'])
 ![png](output_16_0.png)
 
 
-Assess majority class balance. For this specific case, the number of possitives and negative should be balanced otherwise the model will be too much influenced by samples of one class (majority) while the other (minotiry) remains irrelevant for predictions 
+Assess majority class balance. For this specific case, the number of positives and negative should be balanced otherwise the model will be too much influenced by samples of one class (majority) while the other (minority) remains irrelevant for predictions 
 
-For this specific case, as the number of negatives is much longer that possitives we downsample negatives to meet possitive numbers
+For this specific case, as the number of negatives is much longer that positives we downsample negatives to meet positive numbers
 
-As magnitures of different features might vary significantly data is standarized and features are scaled near 0 value. That technique improves model training. 
+As magnitudes of different features might vary significantly. Data is standarized and features are scaled near 0 value. That technique improves model training. 
 
 PCA (Principal component analysis) has been commented in the code as it has not being identified any feature within the resulting ones after the downsampling that could be potentially discarded because of having a very low variance ratio
 
-Finally, dataset is splitted into train and test datasets. It's exactrated the 25% of the dataset to perform the test of the trained model
+Finally, dataset is splitted into train and test datasets. It is extracted the 25% of the dataset to perform the test of the trained model
 
 
 ```python
@@ -1652,19 +1652,19 @@ Function to print a graph to compare the model trained metrics. The metrics will
 
 Several metrics are compare between models: 
 
-Before going into explainig what means each of them we review some binary classification important concepts 
+Before going into explaining what means each of them, we review some binary classification important concepts 
 
-**True Positives (TP)** - These are the correctly predicted positive values which means that the value of actual class is yes and the value of predicted class is also yes. E.g. if actual class value indicates that the vehicle failed and the prediction tells you the same thing.
+**True Positives (TP)** - These are the correctly predicted positive values which means that the value of actual class is yes and the value of predicted class is also yes. E.g. if actual class value indicates that the device failed and the prediction tells you the same thing.
 
-**True Negatives (TN)** - These are the correctly predicted negative values which means that the value of actual class is no and value of predicted class is also no. E.g. if actual class says the vehicule failed and predicion tells you the same thing.
+**True Negatives (TN)** - These are the correctly predicted negative values which means that the value of actual class is no and value of predicted class is also no. E.g. if actual class says the device failed and prediction tells you the same thing.
 
 False positives and false negatives, these values occur when your actual class contradicts with the predicted class.
 
-**False Positives (FP)** – When actual class is no and predicted class is yes. E.g. if actual class says that the vehicule did not failed but the prediction class tells you that the vehicle failed.
+**False Positives (FP)** – When actual class is no and predicted class is yes. E.g. if actual class says that the device did not failed but the prediction class tells you that the device failed.
 
-**False Negatives (FN)** – When actual class is yes but predicted class in no. E.g. if actual class value indicates the vehicle failed and predicted class tells you that the vehicule failed.
+**False Negatives (FN)** – When actual class is yes but predicted class in no. E.g. if actual class value indicates the device failed and predicted class tells you that the device failed.
 
-What metrics basically do is to relationate these values
+What metrics do is to calculate different relations of these values
 
 **Accuracy** : Accuracy = TP+TN/TP+FP+FN+TN 
 
@@ -1672,17 +1672,17 @@ Accuracy is the most intuitive performance measure and it is simply a ratio of c
 
 **Recall** : Recall = TP/TP+FN
 
-Recall is the ratio of correctly predicted positive observations to the all observations in actual class - yes. It is a meassure of completness of the true predicted results vs actual ones. Others say this is the ratio of sensitivity. 
+Recall is the ratio of correctly predicted positive observations to the all observations in actual class - yes. It is a measure of completeness of the true predicted results vs actual ones. Others say this is the ratio of sensitivity. 
 
 **F1** : F1 = 2*(Recall * Precision) / (Recall + Precision)
 
 F1 Score is the weighted average of Precision and Recall. Therefore, this score takes both false positives and false negatives into account. Intuitively it is not as easy to understand as accuracy, but F1 is usually more useful than accuracy, especially if you have an uneven class distribution. Accuracy works best if false positives and false negatives have similar cost. If the cost of false positives and false negatives are very different, it’s better to look at both Precision and Recall
 
-**Precission** : Precision = TP/TP+FP
+**Precision** : Precision = TP/TP+FP
 
 Precision is the ratio of correctly predicted positive observations to the total predicted positive observations.
 
-One of the goals of this exercice is to find a model that maximizes the number of TP and TN. **Accuracy** would be a good metric to look at but for the completness of this exercise the rest of metrics are assessed as well.
+One of the goals of this exercise is to find a model that maximizes the number of TP and TN. **Accuracy** would be a good metric to look at but for the completness of this exercise the rest of metrics are assessed as well.
 
 
 
@@ -1753,11 +1753,11 @@ plot_metrics("Presision", precision_columns, precision_values)
                           x         y
     3        Decision_Tree  0.867925
     6             AdaBoost  0.867925
-    4        Random_Forest  0.830189
+    4        Random_Forest  0.849057
     8                  QDA  0.811321
     7          Naive_Bayes  0.773585
-    5           Neural_Net  0.698113
     9  Logistic_Regression  0.698113
+    5           Neural_Net  0.641509
     1                  SVC  0.566038
     2     Gaussian_Process  0.566038
     0    Nearest_Neighbors  0.471698
@@ -1771,11 +1771,11 @@ plot_metrics("Presision", precision_columns, precision_values)
                           x         y
     3        Decision_Tree  0.793103
     6             AdaBoost  0.793103
-    4        Random_Forest  0.724138
+    4        Random_Forest  0.758621
     8                  QDA  0.655172
     7          Naive_Bayes  0.586207
-    5           Neural_Net  0.517241
     9  Logistic_Regression  0.448276
+    5           Neural_Net  0.413793
     2     Gaussian_Process  0.344828
     0    Nearest_Neighbors  0.310345
     1                  SVC  0.275862
@@ -1789,11 +1789,11 @@ plot_metrics("Presision", precision_columns, precision_values)
                           x         y
     3        Decision_Tree  0.867925
     6             AdaBoost  0.867925
-    4        Random_Forest  0.823529
+    4        Random_Forest  0.846154
     8                  QDA  0.791667
     7          Naive_Bayes  0.739130
-    5           Neural_Net  0.652174
     9  Logistic_Regression  0.619048
+    5           Neural_Net  0.558140
     2     Gaussian_Process  0.465116
     1                  SVC  0.410256
     0    Nearest_Neighbors  0.391304
@@ -1810,8 +1810,8 @@ plot_metrics("Presision", precision_columns, precision_values)
     9  Logistic_Regression  1.000000
     3        Decision_Tree  0.958333
     6             AdaBoost  0.958333
-    4        Random_Forest  0.954545
-    5           Neural_Net  0.882353
+    4        Random_Forest  0.956522
+    5           Neural_Net  0.857143
     1                  SVC  0.800000
     2     Gaussian_Process  0.714286
     0    Nearest_Neighbors  0.529412
@@ -1821,7 +1821,7 @@ plot_metrics("Presision", precision_columns, precision_values)
 ![png](output_25_7.png)
 
 
-As an additional metric of model performance, it is assessed the model calibration which also looks at the probability of possitives comparing with the actual number of predicted possitives
+As an additional metric of model performance, it is assessed the model calibration which also looks at the probability of positives comparing with the actual number of predicted positives
 
 
 ```python
@@ -1864,6 +1864,6 @@ checkModelCalibration(xtrain,xtest, ytrain,ytest,models,model_name)
 
 As a conclusion **Decision tree** and **Adaboost** seem to be the best models in terms of **Accuracy** and calibration with the train data that has been provided for this exercise however better results could be obtained with larger datasets. 
 
-For this specific case Decission tree might be the best model as there was no linear relation between features used for training. That same reason could have affected negativelly to the linear models performance however sometimes is hard to explain why one model behaves better than the other.  
+For this specific case Decision tree, Adaboost or even Radom Forest might be the best models as there was no linear relation between features used for training. That same reason could have affected negatively to the linear models performance SVC, LogisticRegresion,etc however sometimes is hard to explain why one model behaves better than the other does.  
 
-As a general recommendation I would keep running the majority of the models unless there is no computing resources enought available to run the models.
+As a general recommendation, I would keep running the majority of the models unless there is no computing resources enough available to run them.
